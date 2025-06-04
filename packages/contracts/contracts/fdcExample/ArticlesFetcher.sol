@@ -10,34 +10,54 @@ struct ArticleData {
     uint256 contentLength;
     uint256 publicationCount;
     string overallBias;
+}
+
+struct Top3ArticlesData {
+    ArticleData article1;
+    ArticleData article2;
+    ArticleData article3;
     uint256 totalArticles;
 }
 
 struct DataTransportObject {
-    string title;
-    string date;
-    uint256 contentLength;
-    uint256 publicationCount;
-    string overallBias;
+    string title1;
+    string date1;
+    uint256 contentLength1;
+    uint256 publicationCount1;
+    string overallBias1;
+    string title2;
+    string date2;
+    uint256 contentLength2;
+    uint256 publicationCount2;
+    string overallBias2;
+    string title3;
+    string date3;
+    uint256 contentLength3;
+    uint256 publicationCount3;
+    string overallBias3;
     uint256 totalArticles;
 }
 
 interface IArticlesFetcher {
     function updateArticles(IWeb2Json.Proof calldata data) external;
-    function getLatestArticle() external view returns (ArticleData memory);
+    function getTopArticles() external view returns (Top3ArticlesData memory);
+    function getArticleByIndex(uint256 index) external view returns (ArticleData memory);
     function getTotalArticles() external view returns (uint256);
 }
 
 contract ArticlesFetcher {
-    ArticleData public latestArticle;
+    ArticleData[3] public topArticles;
+    uint256 public totalArticles;
     uint256 public timestamp;
     address public owner;
-    uint256 public constant FRESHNESS_THRESHOLD = 1 hours;
+    uint256 public constant FRESHNESS_THRESHOLD = 24 hours; // Daily updates only
+    uint256 public updateCount;
 
     event ArticlesUpdated(
-        string title,
+        uint256 articleCount,
         uint256 timestamp,
-        uint256 totalArticles
+        uint256 totalArticles,
+        uint256 updateNumber
     );
     event OwnershipTransferred(
         address indexed previousOwner,
@@ -52,7 +72,7 @@ contract ArticlesFetcher {
     modifier onlyFreshData() {
         require(
             block.timestamp >= timestamp + FRESHNESS_THRESHOLD,
-            "Data is still fresh, update not needed"
+            "Data is still fresh, update not needed - daily updates only"
         );
         _;
     }
@@ -60,14 +80,19 @@ contract ArticlesFetcher {
     constructor() {
         owner = msg.sender;
         timestamp = 0;
-        latestArticle = ArticleData({
-            title: "",
-            date: "",
-            contentLength: 0,
-            publicationCount: 0,
-            overallBias: "",
-            totalArticles: 0
-        });
+        totalArticles = 0;
+        updateCount = 0;
+        
+        // Initialize empty articles
+        for (uint256 i = 0; i < 3; i++) {
+            topArticles[i] = ArticleData({
+                title: "",
+                date: "",
+                contentLength: 0,
+                publicationCount: 0,
+                overallBias: ""
+            });
+        }
     }
 
     function updateArticles(
@@ -80,53 +105,106 @@ contract ArticlesFetcher {
             (DataTransportObject)
         );
 
-        latestArticle = ArticleData({
-            title: dto.title,
-            date: dto.date,
-            contentLength: dto.contentLength,
-            publicationCount: dto.publicationCount,
-            overallBias: dto.overallBias,
-            totalArticles: dto.totalArticles
+        // Update top 3 articles
+        topArticles[0] = ArticleData({
+            title: dto.title1,
+            date: dto.date1,
+            contentLength: dto.contentLength1,
+            publicationCount: dto.publicationCount1,
+            overallBias: dto.overallBias1
         });
+
+        topArticles[1] = ArticleData({
+            title: dto.title2,
+            date: dto.date2,
+            contentLength: dto.contentLength2,
+            publicationCount: dto.publicationCount2,
+            overallBias: dto.overallBias2
+        });
+
+        topArticles[2] = ArticleData({
+            title: dto.title3,
+            date: dto.date3,
+            contentLength: dto.contentLength3,
+            publicationCount: dto.publicationCount3,
+            overallBias: dto.overallBias3
+        });
+
+        totalArticles = dto.totalArticles;
         timestamp = block.timestamp;
+        updateCount++;
 
-        emit ArticlesUpdated(dto.title, block.timestamp, dto.totalArticles);
+        emit ArticlesUpdated(3, block.timestamp, dto.totalArticles, updateCount);
     }
 
-    function getLatestArticle() public view returns (ArticleData memory) {
-        return latestArticle;
+    function getTopArticles() public view returns (Top3ArticlesData memory) {
+        return Top3ArticlesData({
+            article1: topArticles[0],
+            article2: topArticles[1],
+            article3: topArticles[2],
+            totalArticles: totalArticles
+        });
     }
 
-    function getArticleTitle() public view returns (string memory) {
-        return latestArticle.title;
+    function getArticleByIndex(uint256 index) public view returns (ArticleData memory) {
+        require(index < 3, "Index out of bounds - only 3 articles stored");
+        return topArticles[index];
     }
 
-    function getArticleDate() public view returns (string memory) {
-        return latestArticle.date;
+    function getAllArticles() public view returns (ArticleData[3] memory) {
+        return topArticles;
     }
 
-    function getContentLength() public view returns (uint256) {
-        return latestArticle.contentLength;
+    function getArticleTitle(uint256 index) public view returns (string memory) {
+        require(index < 3, "Index out of bounds");
+        return topArticles[index].title;
     }
 
-    function getPublicationCount() public view returns (uint256) {
-        return latestArticle.publicationCount;
+    function getArticleDate(uint256 index) public view returns (string memory) {
+        require(index < 3, "Index out of bounds");
+        return topArticles[index].date;
     }
 
-    function getOverallBias() public view returns (string memory) {
-        return latestArticle.overallBias;
+    function getContentLength(uint256 index) public view returns (uint256) {
+        require(index < 3, "Index out of bounds");
+        return topArticles[index].contentLength;
+    }
+
+    function getPublicationCount(uint256 index) public view returns (uint256) {
+        require(index < 3, "Index out of bounds");
+        return topArticles[index].publicationCount;
+    }
+
+    function getOverallBias(uint256 index) public view returns (string memory) {
+        require(index < 3, "Index out of bounds");
+        return topArticles[index].overallBias;
     }
 
     function getTotalArticles() public view returns (uint256) {
-        return latestArticle.totalArticles;
+        return totalArticles;
     }
 
     function getLastUpdateTimestamp() public view returns (uint256) {
         return timestamp;
     }
 
+    function getUpdateCount() public view returns (uint256) {
+        return updateCount;
+    }
+
     function isDataFresh() public view returns (bool) {
         return block.timestamp < timestamp + FRESHNESS_THRESHOLD;
+    }
+
+    function getTimeUntilNextUpdate() public view returns (uint256) {
+        if (timestamp == 0) return 0; // Never updated, can update immediately
+        
+        uint256 nextUpdateTime = timestamp + FRESHNESS_THRESHOLD;
+        if (block.timestamp >= nextUpdateTime) {
+            return 0; // Can update now
+        }
+        
+        return nextUpdateTime - block.timestamp;
     }
 
     function transferOwnership(address newOwner) public onlyOwner {
