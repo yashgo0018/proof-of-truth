@@ -1,3 +1,4 @@
 agno
 google-genai
 crawl4ai
+pydantic
