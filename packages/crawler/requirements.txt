@@ -2,3 +2,5 @@ agno
 google-genai
 crawl4ai
 pydantic
+flask[async]
+# Add other dependencies below if any
