@@ -9,5 +9,12 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "trustedDependencies": [
+    "es5-ext",
+    "protobufjs",
+    "web3",
+    "web3-bzz",
+    "web3-shh"
+  ]
 }
