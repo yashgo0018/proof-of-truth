@@ -1,20 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
-import {
-  Calendar,
-  Clock,
-  TrendingUp,
-  Users,
-  Newspaper,
-  Filter,
-} from "lucide-react";
+import { Calendar, Clock, Newspaper, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { clsx } from "clsx";
 
 import { ArticleCard } from "@/components/ArticleCard";
-import { WalletConnect } from "@/components/WalletConnect";
+import { Header } from "@/components/Header";
+import { AuthDebug } from "@/components/auth/AuthDebug";
 import {
   useTodaysArticles,
   useAvailableDates,
@@ -25,7 +18,6 @@ import {
 type FilterType = "today" | "past";
 
 export default function HomePage() {
-  const { isConnected } = useAccount();
   const [filter, setFilter] = useState<FilterType>("today");
   const [selectedDate, setSelectedDate] = useState<bigint | null>(null);
 
@@ -53,43 +45,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Proof of Trust
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Building Trust Through Blockchain
-                </p>
-              </div>
-            </div>
-
-            {/* Wallet Connection */}
-            <div className="flex items-center">
-              {isConnected ? (
-                <WalletConnect />
-              ) : (
-                <button
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  onClick={() => {
-                    /* Wallet connection will be handled by WalletConnect component */
-                  }}
-                >
-                  <Users className="w-4 h-4" />
-                  Connect Wallet
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header with Civic Auth */}
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -210,28 +167,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Wallet Connection Notice */}
-        {!isConnected && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">
-                  Connect Your Wallet to Participate
-                </h3>
-                <p className="text-blue-800 dark:text-blue-300 mb-4">
-                  Connect your wallet to vote on news sentiment and leave
-                  comments. Your participation helps build community consensus
-                  on important news stories.
-                </p>
-                <WalletConnect />
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Articles List */}
         <div className="space-y-6">
           {isLoading ? (
@@ -298,6 +233,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Debug component for development */}
+      <AuthDebug />
     </div>
   );
 }
