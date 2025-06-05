@@ -63,10 +63,10 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  News Sentiment Tracker
+                  Proof of Trust
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Powered by Flare Blockchain
+                  Building Trust Through Blockchain
                 </p>
               </div>
             </div>
@@ -290,11 +290,10 @@ export default function HomePage() {
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-600 dark:text-gray-400">
-            <p className="mb-2">
-              News Sentiment Tracker - Built on Flare Blockchain
-            </p>
+            <p className="mb-2">Proof of Trust - Built on Flare Blockchain</p>
             <p className="text-sm">
-              Transparent, immutable news sentiment tracking powered by Web3
+              Building trust through transparent, immutable news sentiment
+              tracking powered by Web3
             </p>
           </div>
         </div>

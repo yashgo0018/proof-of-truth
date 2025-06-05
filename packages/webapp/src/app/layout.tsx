@@ -16,8 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "News Sentiment Tracker",
-  description: "A Web3 app for tracking news sentiment on Flare blockchain",
+  title: "Proof of Trust",
+  description:
+    "A Web3 app for tracking news sentiment and building trust through blockchain verification",
 };
 
 export default function RootLayout({
