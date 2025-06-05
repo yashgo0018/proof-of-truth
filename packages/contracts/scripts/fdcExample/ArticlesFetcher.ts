@@ -8,7 +8,7 @@ const { WEB2JSON_VERIFIER_URL_TESTNET, VERIFIER_API_KEY_TESTNET, COSTON2_DA_LAYE
 // bunx hardhat run scripts/fdcExample/ArticlesFetcher.ts --network coston2
 
 // Request data for our articles API endpoint - enhanced to get top 3 articles
-const apiUrl = "https://examination-raymond-trial-ae.trycloudflare.com/api/articles/top";
+const apiUrl = "https://chuck-walker-dm-never.trycloudflare.com/api/articles/top";
 const postProcessJq = `. as $all | {title1: $all[0].mainArticleTitle, date1: $all[0].mainArticlePublishedDate, contentLength1: ($all[0].mainArticleContent | length), publicationCount1: ($all[0].coveringPublications | length), overallBias1: ($all[0].overallBiasDistribution | keys[0]), title2: $all[1].mainArticleTitle, date2: $all[1].mainArticlePublishedDate, contentLength2: ($all[1].mainArticleContent | length), publicationCount2: ($all[1].coveringPublications | length), overallBias2: ($all[1].overallBiasDistribution | keys[0]), title3: $all[2].mainArticleTitle, date3: $all[2].mainArticlePublishedDate, contentLength3: ($all[2].mainArticleContent | length), publicationCount3: ($all[2].coveringPublications | length), overallBias3: ($all[2].overallBiasDistribution | keys[0]), totalArticles: ($all | length)}`;
 const httpMethod = "GET";
 // Defaults to "Content-Type": "application/json"
@@ -82,44 +82,86 @@ async function interactWithContract(articlesFetcher: any, proof: any) {
         const topArticles = await articlesFetcher.getTopArticles();
         const updateTimestamp = await articlesFetcher.getLastUpdateTimestamp();
         const updateCount = await articlesFetcher.getUpdateCount();
+        const currentDate = await articlesFetcher.getCurrentDate();
+        const availableDates = await articlesFetcher.getAvailableDates();
 
-        console.log("🗞️  TOP 3 ARTICLES UPDATED:");
-        console.log("═══════════════════════════════════════");
+        console.log("🎉 ARTICLES SUCCESSFULLY UPDATED WITH SENTIMENT TRACKING!");
+        console.log("═══════════════════════════════════════════════════════");
 
-        console.log("\n📰 ARTICLE #1:");
+        console.log("\n📰 ARTICLE #1 (ID: " + topArticles.article1.id + "):");
         console.log("- Title:", topArticles.article1.title);
         console.log("- Date:", topArticles.article1.date);
         console.log("- Content Length:", topArticles.article1.contentLength.toString(), "characters");
         console.log("- Publication Count:", topArticles.article1.publicationCount.toString());
         console.log("- Overall Bias:", topArticles.article1.overallBias);
+        console.log(
+            "- Published Timestamp:",
+            new Date(Number(topArticles.article1.publishedTimestamp) * 1000).toISOString()
+        );
+        console.log(
+            "- Voting Active:",
+            Number(topArticles.article1.publishedTimestamp) + 24 * 3600 > Math.floor(Date.now() / 1000)
+                ? "✅ YES"
+                : "❌ NO"
+        );
 
-        console.log("\n📰 ARTICLE #2:");
+        console.log("\n📰 ARTICLE #2 (ID: " + topArticles.article2.id + "):");
         console.log("- Title:", topArticles.article2.title);
         console.log("- Date:", topArticles.article2.date);
         console.log("- Content Length:", topArticles.article2.contentLength.toString(), "characters");
         console.log("- Publication Count:", topArticles.article2.publicationCount.toString());
         console.log("- Overall Bias:", topArticles.article2.overallBias);
+        console.log(
+            "- Published Timestamp:",
+            new Date(Number(topArticles.article2.publishedTimestamp) * 1000).toISOString()
+        );
+        console.log(
+            "- Voting Active:",
+            Number(topArticles.article2.publishedTimestamp) + 24 * 3600 > Math.floor(Date.now() / 1000)
+                ? "✅ YES"
+                : "❌ NO"
+        );
 
-        console.log("\n📰 ARTICLE #3:");
+        console.log("\n📰 ARTICLE #3 (ID: " + topArticles.article3.id + "):");
         console.log("- Title:", topArticles.article3.title);
         console.log("- Date:", topArticles.article3.date);
         console.log("- Content Length:", topArticles.article3.contentLength.toString(), "characters");
         console.log("- Publication Count:", topArticles.article3.publicationCount.toString());
         console.log("- Overall Bias:", topArticles.article3.overallBias);
+        console.log(
+            "- Published Timestamp:",
+            new Date(Number(topArticles.article3.publishedTimestamp) * 1000).toISOString()
+        );
+        console.log(
+            "- Voting Active:",
+            Number(topArticles.article3.publishedTimestamp) + 24 * 3600 > Math.floor(Date.now() / 1000)
+                ? "✅ YES"
+                : "❌ NO"
+        );
 
-        console.log("\n📊 SUMMARY:");
+        console.log("\n📊 BLOCKCHAIN SUMMARY:");
         console.log("- Total Articles Available:", topArticles.totalArticles.toString());
         console.log("- Last Updated:", new Date(updateTimestamp * 1000).toISOString());
         console.log("- Update Number:", updateCount.toString());
+        console.log("- Current Blockchain Date:", currentDate.toString());
+        console.log("- Available Dates Count:", availableDates.length.toString());
         console.log(
             "- Next Update Available:",
             (await articlesFetcher.isDataFresh())
-                ? "In " + Math.floor((await articlesFetcher.getTimeUntilNextUpdate()).toString() / 3600) + " hours"
+                ? "In " +
+                      Math.floor((await articlesFetcher.getTimeUntilNextUpdate()).toString() / 3600) +
+                      " hours (daily updates)"
                 : "Now"
         );
 
-        // Test individual getter functions
-        console.log("\n🔍 CONTRACT STATE VERIFICATION:");
+        console.log("\n🗳️ SENTIMENT TRACKING READY:");
+        console.log("- Users can now vote on these articles for 24 hours");
+        console.log("- Each article has a unique ID for sentiment tracking");
+        console.log("- Votes and comments will be stored immutably on blockchain");
+        console.log("- Frontend webapp can now display these articles with voting UI");
+
+        // Test enhanced contract functions
+        console.log("\n🔍 ENHANCED CONTRACT VERIFICATION:");
         console.log("- Article 1 Title:", await articlesFetcher.getArticleTitle(0));
         console.log("- Article 2 Title:", await articlesFetcher.getArticleTitle(1));
         console.log("- Article 3 Title:", await articlesFetcher.getArticleTitle(2));
@@ -127,15 +169,20 @@ async function interactWithContract(articlesFetcher: any, proof: any) {
         console.log("- Update Count:", (await articlesFetcher.getUpdateCount()).toString());
         console.log("- Is Data Fresh:", await articlesFetcher.isDataFresh());
         console.log("- Contract Owner:", await articlesFetcher.owner());
+        console.log("- Today's Articles Array Length:", (await articlesFetcher.getTodaysArticles()).length);
+
+        console.log("\n✨ READY FOR WEB3 SENTIMENT VOTING!");
+        console.log("🌐 Frontend URL: http://localhost:3000");
+        console.log("📱 Users can connect wallets and vote now!");
     } catch (error: any) {
-        console.error("Error updating articles:", error.message);
+        console.error("❌ Error updating articles:", error.message);
 
         // Try to get current state anyway
         const topArticles = await articlesFetcher.getTopArticles();
         const updateTimestamp = await articlesFetcher.getLastUpdateTimestamp();
         const updateCount = await articlesFetcher.getUpdateCount();
 
-        console.log("Current Articles Data:");
+        console.log("\n📋 Current Contract State:");
         console.log("- Article 1 Title:", topArticles.article1.title);
         console.log("- Article 2 Title:", topArticles.article2.title);
         console.log("- Article 3 Title:", topArticles.article3.title);
@@ -210,28 +257,69 @@ async function main() {
 
 // Alternative function for just deploying the contract without FDC interaction
 async function deployOnly() {
-    console.log("🏗️  Deploying Enhanced ArticlesFetcher contract only...\n");
+    console.log("🏗️  Deploying Enhanced ArticlesFetcher with Sentiment Tracking...\n");
     const articlesFetcher = await deployAndVerifyContract();
     await displayContractInfo(articlesFetcher);
 
-    console.log("📋 Enhanced Contract Methods Available:");
-    console.log("Core Functions:");
-    console.log("- updateArticles(IWeb2Json.Proof) - Updates top 3 articles (daily only)");
-    console.log("- getTopArticles() - Returns all 3 articles in one call");
+    console.log("📋 ENHANCED CONTRACT METHODS AVAILABLE:");
+    console.log("════════════════════════════════════════");
+
+    console.log("\n🗞️ ARTICLE MANAGEMENT:");
+    console.log("- updateArticles(IWeb2Json.Proof) - Updates top 3 articles (daily only, owner only)");
+    console.log("- getTopArticles() - Returns all 3 articles in structured format");
     console.log("- getAllArticles() - Returns array of 3 articles");
     console.log("- getArticleByIndex(uint256) - Get specific article (0, 1, or 2)");
-    console.log("\nIndividual Article Getters (require index 0-2):");
+    console.log("- getArticleById(uint256) - Get article by unique ID");
+    console.log("- getTodaysArticles() - Get today's articles array");
+    console.log("- getArticlesByDate(uint256) - Get articles for specific date");
+
+    console.log("\n🗳️ SENTIMENT TRACKING:");
+    console.log("- submitSentiment(articleId, isPositive, comment) - Vote on article sentiment");
+    console.log("- getArticleSentiment(articleId, userAddress) - Get sentiment data for article");
+    console.log("- Voting window: 24 hours after article publication");
+    console.log("- One vote per user per article");
+    console.log("- Comments stored immutably on blockchain");
+
+    console.log("\n📅 DATE & HISTORY MANAGEMENT:");
+    console.log("- getCurrentDate() - Get current blockchain date");
+    console.log("- getAvailableDates() - Get all dates with articles");
+    console.log("- Historical articles browsable by date");
+
+    console.log("\n🔍 INDIVIDUAL ARTICLE GETTERS (require index 0-2):");
     console.log("- getArticleTitle(uint256)");
     console.log("- getArticleDate(uint256)");
     console.log("- getContentLength(uint256)");
     console.log("- getPublicationCount(uint256)");
     console.log("- getOverallBias(uint256)");
-    console.log("\nState & Control:");
+
+    console.log("\n⚙️ STATE & CONTROL:");
     console.log("- getTotalArticles() - Total articles available in API");
     console.log("- getUpdateCount() - Number of successful updates");
     console.log("- getTimeUntilNextUpdate() - Seconds until next update allowed");
     console.log("- isDataFresh() - Whether within 24-hour freshness window");
-    console.log("- transferOwnership(address)");
+    console.log("- getLastUpdateTimestamp() - When last updated");
+    console.log("- transferOwnership(address) - Transfer contract ownership");
+
+    console.log("\n📡 EVENTS EMITTED:");
+    console.log("- ArticlesUpdated(articleCount, timestamp, totalArticles, updateNumber)");
+    console.log("- SentimentSubmitted(articleId, voter, isPositive, comment, timestamp)");
+    console.log("- OwnershipTransferred(previousOwner, newOwner)");
+
+    console.log("\n🌐 WEB3 INTEGRATION:");
+    console.log("- Contract Address:", articlesFetcher.address);
+    console.log("- Network: Flare Coston2 Testnet");
+    console.log("- Frontend: http://localhost:3000");
+    console.log("- API Source:", apiUrl);
+
+    console.log("\n🎯 USAGE WORKFLOW:");
+    console.log("1. 📰 Deploy contract (✅ DONE)");
+    console.log(
+        "2. 🔄 Run daily update script: bunx hardhat run scripts/fdcExample/ArticlesFetcher.ts --network coston2"
+    );
+    console.log("3. 🌐 Users visit frontend and connect wallets");
+    console.log("4. 🗳️ Users vote on sentiment within 24-hour window");
+    console.log("5. 📊 Results stored permanently on blockchain");
+    console.log("6. 📅 Historical data browsable by date");
 
     return articlesFetcher;
 }
